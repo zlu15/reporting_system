@@ -27,6 +27,10 @@ import java.util.List;
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
 import static org.mockito.ArgumentMatchers.anyString;
 
+/**
+ * All unit tests are trying to test the controller level logics
+ */
+
 public class APITest {
 
 //    @Autowired
@@ -47,29 +51,28 @@ private static final Logger log = LoggerFactory.getLogger(ExcelGenerationControl
         RestAssuredMockMvc.standaloneSetup(new ExcelGenerationController(excelService));
     }
 
+    /**
+     * This method test when the user try to download a file from database
+     * @throws FileNotFoundException
+     */
     @Test
     public void testFileDownload() throws FileNotFoundException {
-
         ExcelFile testFile = new ExcelFile("0", "/Users/zhongyuanlu/IdeaProjects/reporting_system/temp.xlsx");
-
         Mockito.when(excelService.getExcelBodyById(anyString())).thenReturn(new FileInputStream("temp.xlsx"));
         Mockito.when(excelService.getExcelFileById(anyString())).thenReturn(testFile);
-
         given().accept("application/json").get("/excel/0/content").peek().
                 then().assertThat()
                 .statusCode(200);
-
-        log.info("##############################test##############################");
     }
 
+    /**
+     * This method test when user what to see all files user stored in database
+     * @throws FileNotFoundException
+     */
     @Test
     public void testListFiles() throws FileNotFoundException {
         // Mockito.when(excelService.getExcelBodyById(anyString())).thenReturn(new FileInputStream("temp.xlsx"));
         List<ExcelFile> list = new ArrayList<>();
-//        ExcelFile file = new ExcelFile();
-//        file.setId("0");
-//        file.setPath("/Users/zhongyuanlu/IdeaProjects/reporting_system/temp.xlsx");
-//        list.add(file);
         Mockito.when(excelService.getFiles()).thenReturn(list);
 
         given().accept("application/json").get("/excel").peek().
@@ -78,6 +81,10 @@ private static final Logger log = LoggerFactory.getLogger(ExcelGenerationControl
     }
 
 
+    /**
+     * This method test when user what to delete a file
+     * @throws IOException
+     */
     @Test
     public void testDeleteFileFound() throws IOException{
         ExcelFile testFile = new ExcelFile();
@@ -87,6 +94,10 @@ private static final Logger log = LoggerFactory.getLogger(ExcelGenerationControl
                 .statusCode(200);
     }
 
+    /**
+     * This method test when user what to delete a file but the file does not exist
+     * @throws IOException
+     */
     @Test
     public void testDeleteFileNotFound() throws IOException{
         ExcelFile testFile = new ExcelFile();
@@ -96,28 +107,22 @@ private static final Logger log = LoggerFactory.getLogger(ExcelGenerationControl
                 .statusCode(404);
     }
 
+    /**
+     * This method test when user what to generate a file
+     * @throws IOException
+     */
     @Test
 //    @Disabled
     public void testExcelGeneration() throws IOException {
         // Mockito.when(excelService.getExcelBodyById(anyString())).thenReturn(new FileInputStream("temp.xlsx"));
         ExcelRequest testRequest = new ExcelRequest();
         ExcelData testData = new ExcelData();
-
         File file =  new File("/Users/zhongyuanlu/IdeaProjects/reporting_system/temp.xlsx");
-
-
         Mockito.when(excelService.singleSlicer(testRequest)).thenReturn(testData);
         Mockito.when(excelGenerationService.generateExcelReport(testData)).thenReturn(file);
-
-
         given().accept("application/json").contentType(ContentType.JSON).body("{\"headers\":[\"Name\",\"Age\"], \"data\":[[\"Teresa\",\"5\"],[\"Daniel\",\"1\"]]}").post("/excel").peek().
                 then().assertThat()
                 .statusCode(400);
-
-//        given().accept("application/json").contentType(ContentType.JSON).body("{\"description\":\"test\", \"headers\":[\"Name\",\"Age\"], \"data\":[[\"Teresa\",\"5\"],[\"Daniel\",\"1\"]]}").post("/excel").peek().
-//                then().assertThat()
-//                .statusCode(400);
-
     }
 
 

@@ -45,56 +45,17 @@ public class ExcelGenerationController {
 
     @PostMapping("/excel")
     @ApiOperation("Generate Excel")
-    public ResponseEntity<ExcelResponse> createExcel(@RequestBody @Validated ExcelRequest request) {
-//
-//        System.out.println("test1");
-//
-//        System.out.println("####################################################");
-//        String description = request.getDescription();
-//        System.out.println(description);
-//
-//        System.out.println("####################################################");
-//        List<String> headers = request.getHeaders();
-//        for(String s:headers){
-//            System.out.println(s);
-//        }
-//
-//        System.out.println("####################################################");
-//        List<List<Object>> rows = request.getData();
-//        for(List l: rows){
-//            for(Object o: l){
-//                System.out.println(o);
-//            }
-//        }
-//        ExcelGenerationService excelGenerationService = new ExcelGenerationServiceImpl();
-
-
+    public ResponseEntity<ExcelResponse> createExcel(@RequestBody @Validated ExcelRequest request) throws IOException {
         ExcelData excelData = excelService.singleSlicer(request);
-
-        try {
-            excelGenerationService.generateExcelReport(excelData);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-//        ExcelResponse response = new ExcelResponse();
+        excelGenerationService.generateExcelReport(excelData);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PostMapping("/excel/auto")
     @ApiOperation("Generate Multi-Sheet Excel Using Split field")
-    public ResponseEntity<ExcelResponse> createMultiSheetExcel(@RequestBody @Validated MultiSheetExcelRequest request) {
-
-//        ExcelGenerationService excelGenerationService = new ExcelGenerationServiceImpl();
+    public ResponseEntity<ExcelResponse> createMultiSheetExcel(@RequestBody @Validated MultiSheetExcelRequest request) throws IOException {
         ExcelData excelData = excelService.multiSlicer(request);
-
-        try {
-            excelGenerationService.generateExcelReport(excelData);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-//        ExcelResponse response = new ExcelResponse();
+        excelGenerationService.generateExcelReport(excelData);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -103,7 +64,7 @@ public class ExcelGenerationController {
     public ResponseEntity<List<ExcelResponse>> listExcels() {
         var response = new ArrayList<ExcelResponse>();
         List<ExcelFile> files = excelService.getFiles();
-
+        //convert all ExcelFile form into ExcelResponse form for user to read
         for(ExcelFile f: files){
             ExcelResponse excelResponse = new ExcelResponse();
             String id = f.getId();
@@ -113,28 +74,23 @@ public class ExcelGenerationController {
             excelResponse.setPath(path);
             response.add(excelResponse);
         }
-//        System.out.println("Following files are all exsiting files in current database");
-//        System.out.println(files);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/excel/{id}/content")
     public void downloadExcel(@PathVariable String id, HttpServletResponse response) throws IOException {
         InputStream fis = excelService.getExcelBodyById(id);
-
         if(fis==null){
             String error = new String("DOWNLOAD_FILE_NOT_FOUND");
             throw new FileNotFoundException(error);
         }
-
+        //get and slice the proper file name to demo it to user
         ExcelFile file = excelService.getExcelFileById(id);
         String path = file.getPath();
         path = path.substring(49);
         String myFileName = "attachment; filename="+path;
-        //InputStream fis = new FileInputStream("/Users/zhongyuanlu/IdeaProjects/reporting_system/file0.xlsx");
-        response.setHeader("Content-Type","application/vnd.ms-excel");
-        //response.setHeader("Content-Disposition","attachment; filename=\"myCopy.xlsx\""); //
 
+        response.setHeader("Content-Type","application/vnd.ms-excel");
         response.setHeader("Content-Disposition",myFileName);
         FileCopyUtils.copy(fis, response.getOutputStream());
     }
@@ -161,6 +117,3 @@ public class ExcelGenerationController {
     }
 
 }
-// Log
-// Exception handling
-// Validation

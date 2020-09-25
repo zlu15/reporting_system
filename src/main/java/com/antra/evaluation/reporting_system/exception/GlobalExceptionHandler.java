@@ -11,16 +11,14 @@ import javax.servlet.http.HttpServletRequest;
 @RestControllerAdvice
 public class GlobalExceptionHandler  {
     /**
-     * dealing exception
+     * dealing exception for the test case. A demo for using AOP idea to handling exception with a globle exception
      */
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(Throwable.class)
     public ErrorResponse handleThrowable(Throwable e, HttpServletRequest request) {
-
         ErrorResponse error = new ErrorResponse();
         error.setErrorCode(400);
         error.setMessage("Exception due to service level");
-//        log.error("URL:{} ,系统异常: ",request.getRequestURI(), e);
         return error;
     }
 }

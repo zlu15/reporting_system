@@ -16,6 +16,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+/**
+ * All unit test are trying to test the service level logic
+ */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class ReportingSystemApplicationTests {
 
@@ -71,6 +75,9 @@ class ReportingSystemApplicationTests {
         sheets.add(sheet2);
     }
 
+    /**
+     * This method will test if the excel file has been generated
+     */
     @Test
     public void testExcelGeneration() {
         File file = null;

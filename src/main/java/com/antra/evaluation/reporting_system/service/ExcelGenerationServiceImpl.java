@@ -36,7 +36,7 @@ public class ExcelGenerationServiceImpl implements ExcelGenerationService {
     @Autowired
     ExcelRepository excelRepository;
 
-    AtomicInteger fileID = new AtomicInteger(0);
+    static AtomicInteger fileID = new AtomicInteger(0);
 
     private void validateDate(ExcelData data) {
         if (data.getSheets().size() < 1) {
@@ -112,7 +112,6 @@ public class ExcelGenerationServiceImpl implements ExcelGenerationService {
 
         File currDir = new File(".");
         String path = currDir.getAbsolutePath();
-//        System.out.println("########################################"+path);
         String fileLocation = path.substring(0, path.length() - 1) + "file" + fileID +".xlsx";  //
 
 
