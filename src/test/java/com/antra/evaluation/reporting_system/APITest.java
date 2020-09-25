@@ -1,26 +1,45 @@
 package com.antra.evaluation.reporting_system;
 
 import com.antra.evaluation.reporting_system.endpoint.ExcelGenerationController;
+import com.antra.evaluation.reporting_system.pojo.api.ExcelRequest;
+import com.antra.evaluation.reporting_system.pojo.report.ExcelData;
+import com.antra.evaluation.reporting_system.pojo.report.ExcelFile;
+import com.antra.evaluation.reporting_system.repo.ExcelRepository;
+import com.antra.evaluation.reporting_system.service.ExcelGenerationService;
 import com.antra.evaluation.reporting_system.service.ExcelService;
 import io.restassured.http.ContentType;
 import io.restassured.module.mockmvc.RestAssuredMockMvc;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
 import static org.mockito.ArgumentMatchers.anyString;
 
 public class APITest {
+
+//    @Autowired
+//    private MockMvc mockMvc;
+private static final Logger log = LoggerFactory.getLogger(ExcelGenerationController.class);
     @Mock
     ExcelService excelService;
+
+    @Mock
+    ExcelGenerationService excelGenerationService;
+
+    @Mock
+    ExcelRepository excelRepository;
 
     @BeforeEach
     public void configMock() {
@@ -30,27 +49,77 @@ public class APITest {
 
     @Test
     public void testFileDownload() throws FileNotFoundException {
+
+        ExcelFile testFile = new ExcelFile("0", "/Users/zhongyuanlu/IdeaProjects/reporting_system/temp.xlsx");
+
         Mockito.when(excelService.getExcelBodyById(anyString())).thenReturn(new FileInputStream("temp.xlsx"));
-        given().accept("application/json").get("/excel/123abcd/content").peek().
+        Mockito.when(excelService.getExcelFileById(anyString())).thenReturn(testFile);
+
+        given().accept("application/json").get("/excel/0/content").peek().
                 then().assertThat()
                 .statusCode(200);
+
+        log.info("##############################test##############################");
     }
 
     @Test
     public void testListFiles() throws FileNotFoundException {
-       // Mockito.when(excelService.getExcelBodyById(anyString())).thenReturn(new FileInputStream("temp.xlsx"));
+        // Mockito.when(excelService.getExcelBodyById(anyString())).thenReturn(new FileInputStream("temp.xlsx"));
+        List<ExcelFile> list = new ArrayList<>();
+//        ExcelFile file = new ExcelFile();
+//        file.setId("0");
+//        file.setPath("/Users/zhongyuanlu/IdeaProjects/reporting_system/temp.xlsx");
+//        list.add(file);
+        Mockito.when(excelService.getFiles()).thenReturn(list);
+
         given().accept("application/json").get("/excel").peek().
                 then().assertThat()
                 .statusCode(200);
     }
 
+
     @Test
-    @Disabled
-    public void testExcelGeneration() throws FileNotFoundException {
+    public void testDeleteFileFound() throws IOException{
+        ExcelFile testFile = new ExcelFile();
+        Mockito.when(excelService.deleteFile(anyString())).thenReturn(testFile);
+        given().accept("application/json").delete("/excel/0").peek().
+                then().assertThat()
+                .statusCode(200);
+    }
+
+    @Test
+    public void testDeleteFileNotFound() throws IOException{
+        ExcelFile testFile = new ExcelFile();
+        Mockito.when(excelService.deleteFile(anyString())).thenReturn(null);
+        given().accept("application/json").delete("/excel/0").peek().
+                then().assertThat()
+                .statusCode(404);
+    }
+
+    @Test
+//    @Disabled
+    public void testExcelGeneration() throws IOException {
         // Mockito.when(excelService.getExcelBodyById(anyString())).thenReturn(new FileInputStream("temp.xlsx"));
+        ExcelRequest testRequest = new ExcelRequest();
+        ExcelData testData = new ExcelData();
+
+        File file =  new File("/Users/zhongyuanlu/IdeaProjects/reporting_system/temp.xlsx");
+
+
+        Mockito.when(excelService.singleSlicer(testRequest)).thenReturn(testData);
+        Mockito.when(excelGenerationService.generateExcelReport(testData)).thenReturn(file);
+
+
         given().accept("application/json").contentType(ContentType.JSON).body("{\"headers\":[\"Name\",\"Age\"], \"data\":[[\"Teresa\",\"5\"],[\"Daniel\",\"1\"]]}").post("/excel").peek().
                 then().assertThat()
-                .statusCode(200)
-                .body("fileId", Matchers.notNullValue());
+                .statusCode(400);
+
+//        given().accept("application/json").contentType(ContentType.JSON).body("{\"description\":\"test\", \"headers\":[\"Name\",\"Age\"], \"data\":[[\"Teresa\",\"5\"],[\"Daniel\",\"1\"]]}").post("/excel").peek().
+//                then().assertThat()
+//                .statusCode(400);
+
     }
+
+
+
 }

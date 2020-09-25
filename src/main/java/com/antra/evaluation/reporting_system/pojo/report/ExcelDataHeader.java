@@ -1,6 +1,10 @@
 package com.antra.evaluation.reporting_system.pojo.report;
 
+import javax.validation.constraints.NotNull;
+
 public class ExcelDataHeader {
+
+    @NotNull
     private String name;
     private ExcelDataType type;
     private int width;

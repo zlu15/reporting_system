@@ -1,10 +1,8 @@
 package com.antra.evaluation.reporting_system;
 
-import com.antra.evaluation.reporting_system.pojo.report.ExcelData;
-import com.antra.evaluation.reporting_system.pojo.report.ExcelDataHeader;
-import com.antra.evaluation.reporting_system.pojo.report.ExcelDataSheet;
-import com.antra.evaluation.reporting_system.pojo.report.ExcelDataType;
+import com.antra.evaluation.reporting_system.pojo.report.*;
 import com.antra.evaluation.reporting_system.service.ExcelGenerationService;
+import com.antra.evaluation.reporting_system.service.ExcelService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +21,9 @@ class ReportingSystemApplicationTests {
 
     @Autowired
     ExcelGenerationService reportService;
+
+    @Autowired
+    ExcelService excelService;
 
     ExcelData data = new ExcelData();
 
@@ -70,7 +72,7 @@ class ReportingSystemApplicationTests {
     }
 
     @Test
-    public void testExcelGegeration() {
+    public void testExcelGeneration() {
         File file = null;
         try {
             file = reportService.generateExcelReport(data);
@@ -79,4 +81,77 @@ class ReportingSystemApplicationTests {
         }
         assertTrue(file != null);
     }
+
+    /**
+     * Test for list all files when there is no file being created at all
+     */
+    @Test
+    public void testExcelList1(){
+        List<ExcelFile> files = excelService.getFiles();
+        assertTrue(files.size() == 0);
+    }
+
+    /**
+     * Test for list all files when there are two files being created
+     */
+    @Test
+    public void testExcelList2(){
+        List<ExcelFile> files = excelService.getFiles();
+        File file = null;
+        try {
+            file = reportService.generateExcelReport(data);
+            file = reportService.generateExcelReport(data);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+        files = excelService.getFiles();
+        assertTrue(files.size() == 2);
+
+    }
+
+    /**
+     * Test download service when there exists a file for downloading
+     */
+    @Test
+    public void testDownloadFile1(){
+        File file = null;
+        try {
+            file = reportService.generateExcelReport(data);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        InputStream fis = excelService.getExcelBodyById("0");
+        assertTrue(fis!=null);
+
+
+        ExcelFile testFile = excelService.getExcelFileById("0");
+        assertTrue(testFile!=null);
+
+    }
+
+//    @Test(expected = IndexOutOfBoundsException.class)
+//    public void testDelete(){
+//        File file = null;
+//        try {
+//            file = reportService.generateExcelReport(data);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        excelService.deleteFile("0");
+//
+//        excelService.getExcelFileById("0");
+//
+////        ExcelFile file1 = excelService.getExcelFileById("0");
+//
+////        assertTrue(file1==null);
+//
+//    }
+
+//    @Test
+//    public void shouldThrowException() {
+//        assertThatThrownBy(() -> methodThrowingException()).hasCause(InetAddressException .class);
+//    }
 }

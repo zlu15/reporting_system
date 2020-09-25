@@ -1,10 +1,24 @@
 package com.antra.evaluation.reporting_system.pojo.api;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 public class ExcelRequest {
+
+    @NotNull
     private List<String> headers;
+    @NotNull
     private String description;
+
+    private List<List<Object>> data;
+
+    public List<List<Object>> getData() {
+        return data;
+    }
+
+    public void setData(List<List<Object>> data) {
+        this.data = data;
+    }
 
     public String getDescription() {
         return description;

@@ -1,9 +1,12 @@
 package com.antra.evaluation.reporting_system.pojo.report;
 
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 public class ExcelDataSheet {
+
+    @NotNull
     private String title;
     private List<ExcelDataHeader> headers;
     private List<List<Object>> dataRows;

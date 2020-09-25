@@ -3,17 +3,20 @@ package com.antra.evaluation.reporting_system.service;
 import com.antra.evaluation.reporting_system.pojo.report.ExcelData;
 import com.antra.evaluation.reporting_system.pojo.report.ExcelDataHeader;
 import com.antra.evaluation.reporting_system.pojo.report.ExcelDataSheet;
+import com.antra.evaluation.reporting_system.pojo.report.ExcelFile;
+import com.antra.evaluation.reporting_system.repo.ExcelRepository;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Date;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Data Stucture
@@ -29,6 +32,11 @@ import java.util.List;
  */
 @Service
 public class ExcelGenerationServiceImpl implements ExcelGenerationService {
+
+    @Autowired
+    ExcelRepository excelRepository;
+
+    AtomicInteger fileID = new AtomicInteger(0);
 
     private void validateDate(ExcelData data) {
         if (data.getSheets().size() < 1) {
@@ -104,7 +112,15 @@ public class ExcelGenerationServiceImpl implements ExcelGenerationService {
 
         File currDir = new File(".");
         String path = currDir.getAbsolutePath();
-        String fileLocation = path.substring(0, path.length() - 1) + "temp.xlsx";  // TODO : file name cannot be hardcoded here
+//        System.out.println("########################################"+path);
+        String fileLocation = path.substring(0, path.length() - 1) + "file" + fileID +".xlsx";  //
+
+
+        ExcelFile file = new ExcelFile(fileID.toString(),fileLocation);
+        excelRepository.saveFile(file);
+
+        int i = fileID.addAndGet(1);
+        fileID.set(i);
 
         FileOutputStream outputStream = new FileOutputStream(fileLocation);
         workbook.write(outputStream);
