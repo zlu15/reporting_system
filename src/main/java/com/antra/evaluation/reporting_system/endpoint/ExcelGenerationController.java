@@ -133,7 +133,8 @@ public class ExcelGenerationController {
         String myFileName = "attachment; filename="+path;
         //InputStream fis = new FileInputStream("/Users/zhongyuanlu/IdeaProjects/reporting_system/file0.xlsx");
         response.setHeader("Content-Type","application/vnd.ms-excel");
-        //response.setHeader("Content-Disposition","attachment; filename=\"myCopy.xlsx\""); // TODO: File name cannot be hardcoded here
+        //response.setHeader("Content-Disposition","attachment; filename=\"myCopy.xlsx\""); //
+
         response.setHeader("Content-Disposition",myFileName);
         FileCopyUtils.copy(fis, response.getOutputStream());
     }
